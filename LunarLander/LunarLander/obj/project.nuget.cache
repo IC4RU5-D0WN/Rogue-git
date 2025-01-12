@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "bM+5iLTx1o8=",
+  "success": true,
+  "projectFilePath": "F:\\Rogue-git\\LunarLander\\LunarLander\\LunarLander.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ICARUS\\.nuget\\packages\\communitytoolkit.highperformance\\8.1.0\\communitytoolkit.highperformance.8.1.0.nupkg.sha512",
+    "C:\\Users\\ICARUS\\.nuget\\packages\\raylib-csharp-vinculum\\5.0.1\\raylib-csharp-vinculum.5.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

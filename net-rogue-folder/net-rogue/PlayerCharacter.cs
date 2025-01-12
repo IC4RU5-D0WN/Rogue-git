@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ZeroElectric.Vinculum;
 
 namespace net_rogue
 {
@@ -16,10 +18,11 @@ namespace net_rogue
         public Role role;
 
         public char image;
-        public ConsoleColor drawColor;
+        public ZeroElectric.Vinculum.Color Color;
 
         public Vector2 position;
-
+        public Texture imageTexture;
+        public Map currentMap;
 
 
         public void move(int moveX, int moveY, Map CurrentMap  )
@@ -45,22 +48,32 @@ namespace net_rogue
                 position.Y = Console.WindowHeight - 1;
             }
 
-            if (CurrentMap.mapTiles[(int)(position.X + (position.Y * CurrentMap.mapWidth))] == 2)  //stops player from moving into tiles with impassable id types
+            bool enemycheck = currentMap.GetEnemyAt((int)position.X, (int)position.Y);
+            bool itemcheck = currentMap.GetItemAt((int)position.X, (int)position.Y);
+
+            if (CurrentMap.layers[0].mapTiles[(int)(position.X + (position.Y * CurrentMap.mapWidth))] == 2)  //stops player from moving into tiles with impassable id types
             {
                 position.X -= moveX;
                 position.Y -= moveY;
             }
            
-
-            Draw();
-
+            if (enemycheck & itemcheck)
+            {
+                position.X -= moveX;
+                position.Y -= moveY;
+            }
         }
 
         public void Draw()
         {
             // Draw the player
             Console.SetCursorPosition((int)position.X, (int)position.Y);
-            Console.Write("@");
+            int drawPixelX = (int)(position.X * Game.tileSize);
+            int drawPixelY = (int)(position.Y * Game.tileSize);
+            Raylib.DrawTexture(imageTexture, drawPixelX, drawPixelY, Raylib.WHITE);
+            
+
+
         }
     }
 
