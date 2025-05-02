@@ -10,6 +10,24 @@ namespace net_rogue
 {
     internal class Map
     {
+        public Texture imageTexture;
+        public List<Item> items;
+        public List<Enemy> enemies;
+        public MapLayer[] layers;
+        public int mapWidth;
+        public int mapHeight;
+        public int[] data;
+
+        const int imagesPerRow = 12;
+        
+        Color bg_color = Raylib.YELLOW;
+
+        public enum MapTile : int
+        {
+            Floor = 48,
+            Wall = 40
+        }
+
         public Map()
         {
             mapWidth = 1;
@@ -35,14 +53,6 @@ namespace net_rogue
             Console.WriteLine($"Error: No layer with name: {layerName}");
             return null; // Wanted layer was not found!
         }
-
-        public List<Item> items;
-        public List<Enemy> enemies;
-        public MapLayer[] layers;
-        public int mapWidth;
-        public int mapHeight;
-        public int[] mapTiles;
-        Color bg_color = Raylib.YELLOW;
 
         public bool GetEnemyAt(int x, int y)
         {
@@ -72,7 +82,7 @@ namespace net_rogue
         {
             // Hae viholliset sisältävä taso kentästä
             MapLayer ItemLayer = GetLayer("items");
-            int[] ItemTiles = ItemLayer.mapTiles;
+            int[] ItemTiles = ItemLayer.data;
             int layerHeight = ItemTiles.Length / mapWidth;
 
             // Käy taso läpi ja luo viholliset
@@ -114,7 +124,7 @@ namespace net_rogue
         {
             // Hae viholliset sisältävä taso kentästä
             MapLayer enemyLayer = GetLayer("enemies");
-            int[] enemyTiles = enemyLayer.mapTiles;
+            int[] enemyTiles = enemyLayer.data;
             int layerHeight = enemyTiles.Length / mapWidth;
 
             // Käy taso läpi ja luo viholliset
@@ -174,8 +184,8 @@ namespace net_rogue
         public void Draw()
         {
             MapLayer groundLayer = GetLayer("ground");
-            int[] mapTiles = groundLayer.mapTiles;
-            int layerHeight = mapTiles.Length / mapWidth;
+            int[] data = groundLayer.data;
+            int layerHeight = data.Length / mapWidth;
 
             for (int y = 0; y < layerHeight; y++) // for each row
             {
@@ -184,37 +194,70 @@ namespace net_rogue
                     int drawPixelX = (int)(x * Game.tileSize);
                     int drawPixelY = (int)(y * Game.tileSize);
                     int index = x + y * mapWidth; // Calculate index of tile at (x, y)
-                    int tileId = mapTiles[index]; // Read the tile value at index
-
-                    // Draw the tile graphics
-                    //Console.SetCursorPosition(x, y);
-                    switch (tileId)
+                    int tileId = data[index]; // Read the tile value at index
+                    int imageX = tileId % imagesPerRow;
+                    int imageY = (int)(tileId / imagesPerRow);
+                    int imagePixelX = (imageX-1) * Game.tileSize;
+                    int imagePixelY = (imageY) * Game.tileSize;
+                    if (tileId == 12 || tileId == 24 || tileId == 36 || tileId == 48 || tileId == 60)
                     {
-                        case 1:
-                            //Console.Write("."); // Floor
-                            Raylib.DrawRectangle(drawPixelX, drawPixelY, Game.tileSize, Game.tileSize, Raylib.BLACK);
-                            Raylib.DrawText(" ", drawPixelX, drawPixelY, Game.tileSize, Raylib.WHITE);
-                            break;
-                        case 2:
-                            //Console.Write("#"); // Wall
-                            Raylib.DrawRectangle(drawPixelX, drawPixelY, Game.tileSize, Game.tileSize, Raylib.GRAY);
-                            Raylib.DrawText("#", drawPixelX, drawPixelY, Game.tileSize, Raylib.DARKGRAY);
-                            break;
-                        default:
-                            //Console.Write(" ");
-                            Raylib.DrawRectangle(drawPixelX, drawPixelY, Game.tileSize, Game.tileSize, Raylib.BLACK);
-                            Raylib.DrawText(" ", drawPixelX, drawPixelY, Game.tileSize, Raylib.WHITE);
-                            break;
+                        imagePixelY = (imageY-1) * Game.tileSize;
                     }
+
+                    Rectangle imageRect = new Rectangle(imagePixelX, imagePixelY, Game.tileSize, Game.tileSize);
+
+
+                    Vector2 pixelPosition = new Vector2(drawPixelX, drawPixelY);
+
+                    Raylib.DrawTextureRec(imageTexture, imageRect, pixelPosition, Raylib.WHITE);
+
+                    //// Draw the tile graphics
+                    ////Console.SetCursorPosition(x, y);
+                    //switch (tileId)
+                    //{
+                    //    case 1:
+                    //        //Console.Write("."); // Floor
+                    //        Raylib.DrawRectangle(drawPixelX, drawPixelY, Game.tileSize, Game.tileSize, Raylib.BLACK);
+                    //        Raylib.DrawText(" ", drawPixelX, drawPixelY, Game.tileSize, Raylib.WHITE);
+                    //        break;
+                    //    case 2:
+                    //        //Console.Write("#"); // Wall
+                    //        Raylib.DrawRectangle(drawPixelX, drawPixelY, Game.tileSize, Game.tileSize, Raylib.GRAY);
+                    //        Raylib.DrawText("#", drawPixelX, drawPixelY, Game.tileSize, Raylib.DARKGRAY);
+                    //        break;
+                    //    default:
+                    //        //Console.Write(" ");
+                    //        Raylib.DrawRectangle(drawPixelX, drawPixelY, Game.tileSize, Game.tileSize, Raylib.BLACK);
+                    //        Raylib.DrawText(" ", drawPixelX, drawPixelY, Game.tileSize, Raylib.WHITE);
+                    //        break;
+                    //}
                 }
             }
             foreach (Item Toutput in items)
             {
-                Raylib.DrawRectangle(Convert.ToInt32(Toutput.position.X * Game.tileSize), Convert.ToInt32(Toutput.position.Y * Game.tileSize), Game.tileSize, Game.tileSize, Raylib.YELLOW);
+                int imageX = Toutput.spriteIndex % imagesPerRow;
+                int imageY = (int)(Toutput.spriteIndex / imagesPerRow);
+                int imagePixelX = (imageX - 1) * Game.tileSize;
+                int imagePixelY = (imageY) * Game.tileSize;
+
+                //Raylib.DrawRectangle(Convert.ToInt32(Toutput.position.X * Game.tileSize), Convert.ToInt32(Toutput.position.Y * Game.tileSize), Game.tileSize, Game.tileSize, Raylib.YELLOW);
+                Vector2 pixelPosition = new Vector2(Convert.ToInt32(Toutput.position.X * Game.tileSize), Convert.ToInt32(Toutput.position.Y * Game.tileSize));
+                Rectangle imageRect = new Rectangle(imagePixelX, imagePixelY, Game.tileSize, Game.tileSize);
+                Raylib.DrawTextureRec(imageTexture, imageRect, pixelPosition, Raylib.WHITE);
+
             }
             foreach (Enemy Toutput in enemies)
             {
-                Raylib.DrawRectangle(Convert.ToInt32(Toutput.position.X * Game.tileSize), Convert.ToInt32(Toutput.position.Y * Game.tileSize), Game.tileSize, Game.tileSize, Raylib.RED);
+                int imageX = Toutput.spriteIndex % imagesPerRow;
+                int imageY = (int)(Toutput.spriteIndex / imagesPerRow);
+                int imagePixelX = (imageX - 1) * Game.tileSize;
+                int imagePixelY = (imageY) * Game.tileSize;
+
+                //Raylib.DrawRectangle(Convert.ToInt32(Toutput.position.X * Game.tileSize), Convert.ToInt32(Toutput.position.Y * Game.tileSize), Game.tileSize, Game.tileSize, Raylib.RED);
+
+                Vector2 pixelPosition = new Vector2(Convert.ToInt32(Toutput.position.X * Game.tileSize), Convert.ToInt32(Toutput.position.Y * Game.tileSize));
+                Rectangle imageRect = new Rectangle(imagePixelX, imagePixelY, Game.tileSize, Game.tileSize);
+                Raylib.DrawTextureRec(imageTexture, imageRect, pixelPosition, Raylib.WHITE);
             }
             
         }

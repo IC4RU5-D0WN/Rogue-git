@@ -9,11 +9,11 @@ namespace net_rogue
     internal class MapLayer
     {
         public string name;
-        public int[] mapTiles;
+        public int[] data;
         public MapLayer(int mapSize)
         {
             name = "";
-            mapTiles = new int[mapSize];
+            data = new int[mapSize];
         }
     }
 }

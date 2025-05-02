@@ -51,14 +51,20 @@ namespace net_rogue
             bool enemycheck = currentMap.GetEnemyAt((int)position.X, (int)position.Y);
             bool itemcheck = currentMap.GetItemAt((int)position.X, (int)position.Y);
 
-            if (CurrentMap.layers[0].mapTiles[(int)(position.X + (position.Y * CurrentMap.mapWidth))] == 2)  //stops player from moving into tiles with impassable id types
+            if (CurrentMap.layers[0].data[(int)(position.X + (position.Y * CurrentMap.mapWidth))] == 2)  //stops player from moving into tiles with impassable id types
+            {
+                position.X -= moveX;
+                position.Y -= moveY;
+            }
+            if (currentMap.GetLayer("ground").data[(int)(position.X+ (position.Y * 30))] != 49)
             {
                 position.X -= moveX;
                 position.Y -= moveY;
             }
            
-            if (enemycheck & itemcheck)
+            if (enemycheck || itemcheck)
             {
+                Console.WriteLine("LÖYSIT JOTAIN");
                 position.X -= moveX;
                 position.Y -= moveY;
             }

@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using TurboMapReader;
 using ZeroElectric.Vinculum;
 using RayGuiCreator;
+using static net_rogue.Game;
 
 namespace net_rogue
 {
     internal class Game
     {
+        Stack<GameState> stateStack = new Stack<GameState>();
         // List of possible difficulty choices. The indexing starts at 0
         MultipleChoiceEntry difficultyDropDown = new MultipleChoiceEntry(
             new string[] { "Easy", "Medium", "Hard" });
@@ -41,19 +43,24 @@ namespace net_rogue
         int CurrentMap;
         public static readonly int tileSize = 16;
         Color color;
-        GameState currentGameState;
+       // GameState currentGameState;
         PlayerCharacter player;
+        OptionsMenu myOptionsMenu;
+        PauseMenu myPauseMenu;
+       
 
         int menuStartX = 10;
         int menuStartY = 0;
         int rowHeight = Raylib.GetScreenHeight() / 20;
         int menuWidth = Raylib.GetScreenWidth() / 4;
 
-        enum GameState
+        public enum GameState
         {
             MainMenu,
             GameLoop,
-            CharacterCreation
+            CharacterCreation,
+            PauseMenu,
+            OptionsMenu
         }
 
         public void Print()
@@ -97,6 +104,8 @@ namespace net_rogue
             int y = (Raylib.GetScreenHeight() - (rowHeight * rows)) / 2;
             // 3 pixels between rows, text 3 pixels smaller than row height
             MenuCreator c = new MenuCreator(x, y, rowHeight, width, 3, -3);
+            Raylib.ClearBackground(Raylib.BLACK);
+            Raylib.BeginDrawing();
             c.Label("Character Creator");
 
             c.Label("Player name");
@@ -120,10 +129,11 @@ namespace net_rogue
             c.Label("Difficulty toggle");
             c.ToggleGroup(difficultyDropDown);
 
-            if (c.LabelButton(">>Print values to console"))
+            if (c.LabelButton("START GAME"))
             {
-                Print();
+                stateStack.Push(GameState.GameLoop);
             }
+
 
             // Draws open dropdowns over other menu items
             int menuHeight = c.EndMenu();
@@ -136,6 +146,8 @@ namespace net_rogue
                 width + padding * 2,
                 menuHeight + padding * 2,
                 MenuCreator.GetLineColor());
+
+            Raylib.EndDrawing();
         }
         public void DrawMainMenu()
         {
@@ -159,11 +171,15 @@ namespace net_rogue
 
             if (creator.Button("Start Game"))
             {
-                currentGameState = GameState.GameLoop;
+                stateStack.Push(GameState.CharacterCreation);
             }
             if (creator.Button("Nössö"))
             {
                 Raylib.CloseWindow();
+            }
+            if (creator.Button("Options"))
+            {
+                stateStack.Push(GameState.OptionsMenu);
             }
 
             Raylib.EndDrawing();
@@ -196,34 +212,63 @@ namespace net_rogue
                 // Move player right
                 player.move(1, 0, level);
             }
+
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_P))
+            {
+                stateStack.Push(GameState.PauseMenu);
+            }
+
+
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Raylib.BLACK);
             level.Draw();
             player.Draw();
             Raylib.EndDrawing();
+
+
         }
 
+        void OnOptionsBackButtonPressed(object sender, EventArgs args)
+        {
+            stateStack.Pop();
+        }
+
+        void OnPauseOptionsButtonPressed(object sender, EventArgs args)
+        {
+            stateStack.Push(GameState.OptionsMenu);
+        }
+
+        void OnPauseBackButtonPressed(object sender, EventArgs args)
+        {
+            stateStack.Pop();
+        }
         public void Run()
         {
             Console.WindowWidth = 50;
             Console.WindowHeight = 20;
-
+            // INIT MUISTA TÄÄ
             player = new PlayerCharacter();
 
-            currentGameState = GameState.MainMenu;
+            stateStack.Push(GameState.MainMenu);
 
             // Set player starting position
-            player.position = new Vector2(1, 1);
+            player.position = new Vector2(2, 2);
 
-            Raylib.InitWindow(480, 270, "W1");
+            Raylib.InitWindow(1280, 720, "W1");
             Raylib.SetTargetFPS(30);
             Console.SetCursorPosition((int)player.position.X, (int)player.position.Y);
+            myOptionsMenu = new OptionsMenu();
+            // Kytke asetusvalikon tapahtumaan funktio
+            myOptionsMenu.BackButtonPressedEvent += this.OnOptionsBackButtonPressed;
+            myPauseMenu = new PauseMenu();
+            myPauseMenu.BackButtonPressedEvent += this.OnPauseBackButtonPressed;
+            myPauseMenu.OptionsPressedEvent += this.OnPauseOptionsButtonPressed;
 
             MapLoader loader = new MapLoader();
 
-            loader.TestFileReading("Maps/mapfile.json");
+            loader.TestFileReading("Maps/tiledmap.tmj");
 
-            level = loader.LoadMapFromFile("Maps/mapfile_layers.JSON");
+            level = loader.ReadTiledMapFromFile("Maps/tiledmap.tmj");
             level.LoadEnemies();
             level.LoadItems();
             CurrentMap = 1;
@@ -231,6 +276,7 @@ namespace net_rogue
             Console.ForegroundColor = ConsoleColor.White;
             level.Draw();
             player.imageTexture = Raylib.LoadTexture("Textures/MINISHREK.png");
+            level.imageTexture = Raylib.LoadTexture("Textures\\tilemap_packed.png");
             player.Color = Raylib.GREEN;
 
             //Console.Write("@");
@@ -238,11 +284,11 @@ namespace net_rogue
             // Start the game loop:
             while (Raylib.WindowShouldClose() == false)
             {
-                switch (currentGameState)
+                switch (stateStack.Peek())
                 {
-                    //case GameState.CharacterCreation:
-                    //    DrawCharacterCreationMenu();
-                    //    break;
+                    case GameState.CharacterCreation:
+                        DrawCharacterCreationMenu();
+                        break;
 
                     case GameState.MainMenu:
                         // Tämä koodi on uutta
@@ -252,8 +298,19 @@ namespace net_rogue
 
                     case GameState.GameLoop:
                         // Tämä koodi on se mitä GameLoop() funktiossa oli ennen muutoksia
-                        //DrawGameLoop();
-                        DrawCharacterCreationMenu();
+                        DrawGameLoop();
+                        break;
+
+                    case GameState.OptionsMenu:
+
+                        myOptionsMenu.DrawMenu();
+
+                        break;
+
+                    case GameState.PauseMenu:
+
+                        myPauseMenu.DrawMenu();
+
                         break;
                 }
             }

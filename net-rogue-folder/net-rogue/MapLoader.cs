@@ -26,16 +26,29 @@ namespace net_rogue
 
             MapLayer myGroundLayer = new MapLayer(howManyTiles);
             myGroundLayer.name = "ground";
-
+            myGroundLayer.data = groundTiles;
+            rogueMap.mapWidth = groundLayer.width;
+            rogueMap.mapHeight = groundLayer.height;
             // Tallenna taso kenttään
             rogueMap.layers[0] = myGroundLayer;
 
+            //for(int i=0; i < myGroundLayer.data.Length; i++ )
+            //{
+            //    data[i];
+            //}
+
+            //foreach(int id in data)
+            //{
+            //    i
+            //}
             // tason "enemies" tiedot...
             howManyTiles = enemiesLayer.data.Length;
             int[] enemiesTiles = enemiesLayer.data;
 
+
             MapLayer myenemiesLayer = new MapLayer(howManyTiles);
             myenemiesLayer.name = "enemies";
+            myenemiesLayer.data = enemiesTiles;
 
             rogueMap.layers[1] = myenemiesLayer;
 
@@ -45,6 +58,7 @@ namespace net_rogue
 
             MapLayer myitemsLayer = new MapLayer(howManyTiles);
             myitemsLayer.name = "items";
+            myitemsLayer.data = itemsTiles;
 
             rogueMap.layers[2] = myitemsLayer;
 
@@ -52,7 +66,7 @@ namespace net_rogue
             return rogueMap;
         }
 
-        public Map? ReadMapFromFile(string filename)
+        public Map? ReadTiledMapFromFile(string filename)
         {
             // Lataa tiedosto käyttäen TurboMapReaderia   
             TurboMapReader.TiledMap mapMadeInTiled = TurboMapReader.MapReader.LoadMapFromFile(filename);
@@ -119,7 +133,7 @@ namespace net_rogue
         {
             Map Test = new Map();
             Test.mapWidth = 8;
-            Test.mapTiles = new int[] {
+            Test.data = new int[] {
             2, 2, 2, 2, 2, 2, 2, 2,
             2, 1, 1, 2, 1, 1, 1, 2,
             2, 1, 1, 2, 1, 1, 1, 2,

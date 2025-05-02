@@ -14,9 +14,9 @@ namespace net_rogue
         public int spriteIndex;  
         public Enemy(string name, Vector2 position, int spriteIndex)
         {
-
+            this.position = position; 
             this.name = name;
-
+            this.spriteIndex = spriteIndex;
         }
     }
 }

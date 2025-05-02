@@ -21,7 +21,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Maps\tiledmap.tmj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Maps\tiny dungeon.tsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -32,6 +32,9 @@
     <None Update="Textures\MINISHREK.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Textures\tilemap_packed.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -39,8 +42,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\RayGuiCreator\RayGuiCreator\RayGuiCreator.csproj" />
-    <ProjectReference Include="..\..\..\TurboMapReader\TurboMapReader.csproj" />
+    <ProjectReference Include="..\..\..\..\Users\s2200915\OneDrive - Business College Helsinki\Työpöytä\RTSGIT\RayGuiCreator\RayGuiCreator\RayGuiCreator.csproj" />
+    <ProjectReference Include="..\..\..\..\Users\s2200915\OneDrive - Business College Helsinki\Työpöytä\RTSGIT\TurboMapReader\TurboMapReader.csproj" />
   </ItemGroup>
 
 </Project>
